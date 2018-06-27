@@ -9,6 +9,7 @@ require 'rbconfig'
 require 'json'
 require 'json/ext'
 require 'fluent/plugin/buffer'
+require 'time'
 
 module Fluent::Plugin
 
@@ -45,13 +46,6 @@ module Fluent::Plugin
 
 		desc 'identity hash'
 		config_param :identity_hash, :string
-
-		#returns the time at an instant
-		def getTime()
-
-			 return Time.now
-
-		end
 		
 		#check if the container already exists
 		def check_container(blob_client)
@@ -197,7 +191,8 @@ module Fluent::Plugin
 				content+=",\n"
 			end
 		
-			content+="{	\"time\" : \"" + (Time.now).to_s + "\",\n"
+			time= Time.now.strftime('%Y-%m-%dT%H:%M:%SZ').to_s
+			content+="{	\"time\" : \"" + time + "\",\n"
 			content+="	\"resourceId\" : \"" + @resourceId + "\",\n"
 			content+="	\"properties\" : {\n"
 			return content
@@ -252,7 +247,7 @@ module Fluent::Plugin
 
 			return content
 		end
-
+		
 		#for asynchronous buffered output mode
 		def try_write(chunk)
 			
@@ -289,8 +284,8 @@ module Fluent::Plugin
 			if use_source_timestamp
 
 					chunk.msgpack_each {  |(tag, time, record)|
-					
-						record[emit_timestamp_name] = Time.at(time)
+		
+						record[emit_timestamp_name] = Time.now.strftime('%Y-%m-%dT%H:%M:%SZ')
 						content+=handle_record(record,tag)
 					
 					}
@@ -298,7 +293,7 @@ module Fluent::Plugin
 
 				chunk.msgpack_each {|(tag, record)|
 				
-					record[emit_timestamp_name] = Time.now
+					record[emit_timestamp_name] = Time.now.strftime('%Y-%m-%dT%H:%M:%SZ')
 					content+=handle_record(record,tag)
 				
 				}
