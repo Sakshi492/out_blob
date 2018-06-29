@@ -117,8 +117,15 @@ module Fluent::Plugin
 
 		end
 
-		#formats the record received by the output plugin
-		def format_msg(msg)
+		def get_operation(tag)
+		
+			system,operationName,category,level = tag.split(".")
+			return operationName
+
+		end	
+
+		#formats the syslog record received by the output plugin
+		def format_syslog_msg(msg)
 			
 			cont=""
 			i=1
@@ -141,6 +148,18 @@ module Fluent::Plugin
 
 			return cont
 		end
+
+		#formats the file record received by the output plugin
+		def format_file_msg(msg)
+
+			cont=""
+			first,second=msg.split(", ")
+			cont+=split_msg(first) + ",\n"
+			cont+=split_msg(second) + ",\n"
+			return cont
+
+		end
+
 
 		#initializes the plugin 
 		def initialize
@@ -213,7 +232,12 @@ module Fluent::Plugin
 		def tag_text(tag)
 			
 			system,operationName,category,level = tag.split(".")
-			
+
+			if(operationName=="file")
+				category="Unknown"
+				level="Unknown"
+			end
+						
 			content="	\"category\" : \"" + category + "\",\n"
 			content+="	\"level\" : \"" + level + "\",\n"
 			content+=" 	\"operationName\" : \""
@@ -222,8 +246,8 @@ module Fluent::Plugin
 			
 			if sysOperation == "systemsyslog"
 				content+="LinuxSyslogEvent"
-			else 
-				content+= sysOperation
+			else
+				content+= "Unknown"
 			end
 
 			content+="\"\n}"
@@ -237,9 +261,17 @@ module Fluent::Plugin
 			
 			content=pre_text
 			
+			operation=get_operation(tag)
+
 			msg=record.to_s
-			first,rest=msg.split("{",2)
-			content+=format_msg(rest)
+
+			#check if it is file or syslog
+			if operation == "syslog"
+				first,rest=msg.split("{",2)
+				content+=format_syslog_msg(rest)
+			else
+				content+=format_file_msg(msg)
+			end
 
 			content+=post_text
 
