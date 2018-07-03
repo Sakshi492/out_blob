@@ -13,7 +13,7 @@ require 'time'
 
 module Fluent::Plugin
 
-	class BlobPlugin < Fluent::Plugin::Output
+	class Out_Blob < Fluent::Plugin::Output
 		
 		#to register the custom plugin as a new valid fluentd plugin
 		Fluent::Plugin.register_output('blob',self)
