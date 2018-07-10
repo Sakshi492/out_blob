@@ -13,7 +13,7 @@ require 'time'
 
 module Fluent::Plugin
 
-	class Out_Blob < Fluent::Plugin::Output
+	class Out_Blob< Fluent::Plugin::Output
 		
 		#to register the custom plugin as a new valid fluentd plugin
 		Fluent::Plugin.register_output('blob',self)
@@ -27,7 +27,7 @@ module Fluent::Plugin
 		config_param :DeploymentId, :string
 
 		desc 'host'
-		config_param :Host, :string, :default=> "NewVM"
+		config_param :Host, :string
 
 		desc 'the timestamp to use for records sent to blobs'
 		config_param :use_source_timestamp, :bool, :default => true
@@ -84,7 +84,7 @@ module Fluent::Plugin
 			name+="m=" + time.strftime("%m").to_s + "/"
 			name+="d=" + time.strftime("%d").to_s + "/"
 			name+="h=" + time.strftime("%H").to_s + "/"
-			name+="m=" + time.strftime("%M").to_s + "/"
+			name+="m=" + "00" + "/"
 			name+="PT1H.json"
 
 		end
@@ -340,5 +340,5 @@ module Fluent::Plugin
 			@blob_client.append_blob_block(@container, blob_name, content)
 
 		end#method try_write			
-	end # class BlobPlugin
+	end # class Out_Blob
 end #module Fluent::Plugin
